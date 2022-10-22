@@ -8,3 +8,5 @@ The alternate greedy solution starts with the longest list and then restarts fro
 
 The second started solution looked to implement Dijkstra search on the problem, by building a graph with edges and related weights (with weights being length of the destination list).
 It has been copied from [the solution proposed by this lesson on StackAbuse](https://stackabuse.com/courses/graphs-in-python-theory-and-implementation/lessons/dijkstras-algorithm/) and will be expanded after the deadline expires, just to try to get it right.
+
+There are also the solutions proposed by professor Squillero, for completeness and to use the repo to keep track of the topics and solutions.
