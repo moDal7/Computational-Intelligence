@@ -1,4 +1,4 @@
-### Lab 1 - set covering
+# Lab 1 - set covering
 
 Various tests on the lab 1 problem proposed by Professor Squillero.
 The solutions are incomplete, developed in autonomy unfortunately not with enough time: I have had this course locked since wednesday due to overbooking.

@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "rastrigin"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+jupyter = "^1.0.0"
+ipykernel = "^6.16.2"
+ipywidgets = "^8.0.2"
+iprogress = "^0.4"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
