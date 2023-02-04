@@ -196,3 +196,23 @@ class Quarto(object):
             winner = self.check_winner()
         self.print()
         return winner
+
+    def run_no_print(self) -> int:
+        '''
+        Run the game
+        '''
+        winner = -1
+        while winner < 0 and not self.check_finished():
+            piece_ok = False
+            while not piece_ok:
+                piece_ok = self.select(
+                    self.__players[self._current_player].choose_piece())
+            piece_ok = False
+            self._current_player = (
+                self._current_player + 1) % self.MAX_PLAYERS
+            while not piece_ok:
+                x, y = self.__players[self._current_player].place_piece()
+                piece_ok = self.place(x, y)
+            winner = self.check_winner()
+
+        return winner
