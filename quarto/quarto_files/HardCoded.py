@@ -3,7 +3,7 @@ import argparse
 import random
 import numpy as np
 import quarto
-import quarto.objects as objects
+import quarto.objects2 as objects
 
 class RandomPlayer(quarto.Player):
     """Random player"""
@@ -30,19 +30,48 @@ class HardCodedPlayer(quarto.Player):
 
     def place_piece(self) -> tuple[int, int]:
         sequence = self.longest_sequence()
+        check_win = self.place_to_win(sequence)
+        if check_win[0]:
+            return check_win[1], check_win[2]
+        
+        return random.randint(0, 3), random.randint(0, 3)
+
+
+    def place_to_win(self, sequence: list) -> list:
         board = self.get_game().get_board_status()
         for seq in sequence:
-            if seq[2] == 0:
-                row_index = seq[0]
-                row = board[row_index]
-                print(f"row: -> {row}")
-                if self.piece_to_sequence(row):
-                    print("does it work?")
-                    return row_index, row.index(-1)
+            if seq[1]!=4:
+                if seq[2] == 0:
+                    row_index = seq[0]
+                    row = board[row_index]
+                    if self.piece_to_sequence(row):
+                        return True, np.where(row == -1)[0][0], row_index
                 
-        return random.randint(0, 3), random.randint(0, 3)
+                if seq[2]==1:
+                    col_index = seq[0]
+                    col = np.array(board).T[col_index]
+                    if self.piece_to_sequence(col):
+                        return True, col_index, np.where(col == -1)[0][0]
+                    
+                if seq[2]==2:
+                    diag_index = seq[0]
+                    if diag_index==0:
+                        diag = np.diag(np.array(board))
+                    if diag_index==1:
+                        diag = np.diag(np.flip(np.array(board), 1))
+                    if self.piece_to_sequence(diag):
+                        if diag_index==0:
+                            return True, np.where(diag == -1)[0][0], np.where(diag == -1)[0][0]
+                        if diag_index==1:
+                            return True, (3-np.where(diag == -1)[0][0]), np.where(diag == -1)[0][0]
+                    
+        return False, random.randint(0, 3), random.randint(0, 3)
     
     def evaluate_board(self) -> list:
+        '''
+        Returns a list of evaluation of the board based on number of elements
+        on rows, columns and diagonal, in order to spot possible winning/losing combinations
+        '''
         board_rows = []
         board_col = []
         board_diag = [] 
@@ -56,6 +85,9 @@ class HardCodedPlayer(quarto.Player):
         return board_rows, board_col, board_diag
     
     def longest_sequence(self) -> list:
+        '''
+        returns the longest row, column, and diagonal sorted from the longest to the shortest
+        '''
         board_eval = self.evaluate_board()
         longest_list = []
         longest_list = [[np.argmax(board_eval[0]), np.max(board_eval[0]), 0], [np.argmax(board_eval[1]), np.max(board_eval[1]), 1], [np.argmax(board_eval[2]), np.max(board_eval[2]), 2]]
@@ -65,8 +97,9 @@ class HardCodedPlayer(quarto.Player):
     
     def piece_to_sequence(self, row: list) -> bool:
         piece = self.game.get_selected_piece()
-        scores = [self.piece_to_piece(piece, piece_row) for i, piece_row in enumerate(row)]
-        if all(scores)>0 & len(scores)==3:
+        scores = [self.piece_to_piece(piece, piece_row) for i, piece_row in enumerate(row) if piece_row != -1]
+ 
+        if all(scores)>0 and len(scores)==3:
             return True
         else:
             return False
@@ -81,7 +114,6 @@ class HardCodedPlayer(quarto.Player):
         return score
     
 def evaluate_n(game: quarto.Quarto, p1: quarto.Player, p2: quarto.Player, num_games: int=1000) -> None:
-    
     wins = 0
     flag = 1
     
