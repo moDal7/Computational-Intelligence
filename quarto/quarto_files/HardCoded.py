@@ -1,6 +1,7 @@
 import logging
 import argparse
 import random
+import numpy as np
 import quarto
 import quarto.objects as objects
 
@@ -25,20 +26,61 @@ class HardCodedPlayer(quarto.Player):
         self.game = quarto
 
     def choose_piece(self) -> int: 
-        evaluate_board(self)
         return random.randint(0, 15)
 
     def place_piece(self) -> tuple[int, int]:
+        sequence = self.longest_sequence()
+        board = self.get_game().get_board_status()
+        for seq in sequence:
+            if seq[2] == 0:
+                row_index = seq[0]
+                row = board[row_index]
+                print(f"row: -> {row}")
+                if self.piece_to_sequence(row):
+                    print("does it work?")
+                    return row_index, row.index(-1)
+                
         return random.randint(0, 3), random.randint(0, 3)
     
-    def evaluate_board(self) -> dict:
-        board_eval = {}
+    def evaluate_board(self) -> list:
+        board_rows = []
+        board_col = []
+        board_diag = [] 
         board = self.get_game().get_board_status()
-        print(board)
+        board_rows = [sum(position>-1) for position in board]
+        board_col = [sum(position>-1) for position in np.array(board).T]
+        diag1 = [sum(np.diag(np.array(board))>-1)]
+        diag2 = [sum(np.diag(np.flip(np.array(board), 1))>-1)]
+        board_diag = [diag1[0], diag2[0]]
+        
+        return board_rows, board_col, board_diag
+    
+    def longest_sequence(self) -> list:
+        board_eval = self.evaluate_board()
+        longest_list = []
+        longest_list = [[np.argmax(board_eval[0]), np.max(board_eval[0]), 0], [np.argmax(board_eval[1]), np.max(board_eval[1]), 1], [np.argmax(board_eval[2]), np.max(board_eval[2]), 2]]
+        longest = sorted(longest_list, key=lambda x: x[1], reverse=True)  
 
+        return longest
+    
+    def piece_to_sequence(self, row: list) -> bool:
+        piece = self.game.get_selected_piece()
+        scores = [self.piece_to_piece(piece, piece_row) for i, piece_row in enumerate(row)]
+        if all(scores)>0 & len(scores)==3:
+            return True
+        else:
+            return False
 
+    def piece_to_piece(self, piece_1: quarto.Piece, piece_2: quarto.Piece) -> int:
+        char_1 = (self.game.get_piece_charachteristics(piece_1)).binary
+        char_2 = (self.game.get_piece_charachteristics(piece_2)).binary
+        score = 0
+        for i in range(len(char_1)):
+            score=score+1 if char_1[i]==char_2[i] else  score
 
-def evaluate_n(game: quarto.Quarto, p1: quarto.Player, p2: quarto.Player, num_games: int=100) -> None:
+        return score
+    
+def evaluate_n(game: quarto.Quarto, p1: quarto.Player, p2: quarto.Player, num_games: int=1000) -> None:
     
     wins = 0
     flag = 1
@@ -56,19 +98,17 @@ def evaluate_n(game: quarto.Quarto, p1: quarto.Player, p2: quarto.Player, num_ga
 
     logging.warning(f"winning ratio of player1: {wins/num_games} over {num_games} games") 
 
-
-
-def play_one(game: quarto.Quarto, p1: quarto.Player, p2: quarto.Player, num_games: int=1) -> None:
-
+def play_one(game: quarto.Quarto, p1: quarto.Player, p2: quarto.Player) -> None:
     game.reset()
     game.set_players((p1, p2))
     winner = game.run()
     logging.warning(f"Winner is player {winner}") 
     
 def main():
+
     game = quarto.Quarto()
-    #evaluate_n(game, HardCodedPlayer(game), main.RandomPlayer(game))
-    play_one(game, HardCodedPlayer(game), RandomPlayer(game))
+    evaluate_n(game, HardCodedPlayer(game), RandomPlayer(game))
+    #play_one(game, HardCodedPlayer(game), RandomPlayer(game))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
