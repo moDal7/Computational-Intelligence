@@ -26,9 +26,17 @@ class HardCodedPlayer(quarto.Player):
         self.game = quarto
 
     def choose_piece(self) -> int: 
-        return random.randint(0, 15)
+
+        board = self.get_game().get_board_status()
+        all_pieces = range(16)
+        available_pieces = [piece for piece in all_pieces if piece not in board]
+        sequence = self.longest_sequence()
+        piece = self.choose_not_to_lose(available_pieces, sequence)
+
+        return piece
 
     def place_piece(self) -> tuple[int, int]:
+
         sequence = self.longest_sequence()
         check_win = self.place_to_win(sequence)
         if check_win[0]:
@@ -36,8 +44,44 @@ class HardCodedPlayer(quarto.Player):
         
         return random.randint(0, 3), random.randint(0, 3)
 
+    def choose_not_to_lose(self, pieces: list, longest: list) -> int:
+        '''
+        looks for the worse piece for the current board state to give to the opponent
+        if there is a winning piece for a sequence and a non-winning one, it chooses the non-winning one 
+        '''
+        max_score = 0
+        piece_chosen = random.choices(pieces)[0]
+
+        for seq in longest:
+            if seq[1]==3:
+                for piece in pieces:
+                    piece_scores = [self.piece_to_piece(piece, pi) for pi in seq]
+                    if 0 in piece_scores:
+                        return piece
+                
+        for seq in longest:
+            if seq[1]==2:
+                for piece in pieces:
+                    piece_scores = [self.piece_to_piece(piece, pi) for pi in seq]
+                    new_max_score = max(piece_scores) if 0 not in piece_scores else 0
+                    if new_max_score > max_score:
+                        max_score = new_max_score
+                        piece_chosen = piece
+                return piece_chosen
+                
+        for seq in longest:
+            if seq[1]==1:
+                for piece in pieces:
+                    piece_scores = [self.piece_to_piece(piece, pi) for pi in seq]
+                    if 0 in piece_scores:
+                        return piece
+                    
+        return piece_chosen
 
     def place_to_win(self, sequence: list) -> list:
+        '''
+        if the given piece and the board are a winnable situation, it wins
+        '''
         board = self.get_game().get_board_status()
         for seq in sequence:
             if seq[1]!=4:
@@ -96,6 +140,9 @@ class HardCodedPlayer(quarto.Player):
         return longest
     
     def piece_to_sequence(self, row: list) -> bool:
+        '''
+        evaluates the piece against a sequence (row, column or diagonal) and gives a score (0,1,2,3) to each piece already belonging to the 
+        '''
         piece = self.game.get_selected_piece()
         scores = [self.piece_to_piece(piece, piece_row) for i, piece_row in enumerate(row) if piece_row != -1]
  
@@ -109,9 +156,11 @@ class HardCodedPlayer(quarto.Player):
         char_2 = (self.game.get_piece_charachteristics(piece_2)).binary
         score = 0
         for i in range(len(char_1)):
-            score=score+1 if char_1[i]==char_2[i] else  score
+            score=score+1 if char_1[i]==char_2[i] else score
 
         return score
+    
+
     
 def evaluate_n(game: quarto.Quarto, p1: quarto.Player, p2: quarto.Player, num_games: int=1000) -> None:
     wins = 0
