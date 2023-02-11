@@ -4,19 +4,7 @@ import random
 import numpy as np
 import quarto
 import quarto.objects2 as objects
-
-class RandomPlayer(quarto.Player):
-    """Random player"""
-
-    def __init__(self, quarto: quarto.Quarto) -> None:
-        super().__init__(quarto)
-
-    def choose_piece(self) -> int:
-        
-        return random.randint(0, 15)
-
-    def place_piece(self) -> tuple[int, int]:
-        return random.randint(0, 3), random.randint(0, 3)
+from RandomPlayer import RandomPlayer
 
 class HardCodedPlayer(quarto.Player):
     """Player with hard-coded rules"""
@@ -33,8 +21,9 @@ class HardCodedPlayer(quarto.Player):
         sequence = self.longest_sequence()
         piece = self.choose_not_to_lose(available_pieces, sequence)
 
-        return piece
-
+        #return piece
+        return random.randint(0,15)
+    
     def place_piece(self) -> tuple[int, int]:
 
         sequence = self.longest_sequence()
@@ -159,8 +148,12 @@ class HardCodedPlayer(quarto.Player):
             score=score+1 if char_1[i]==char_2[i] else score
 
         return score
-    
-
+     
+'''
+/////////////
+TESTING TOOLS
+/////////////
+'''
     
 def evaluate_n(game: quarto.Quarto, p1: quarto.Player, p2: quarto.Player, num_games: int=1000) -> None:
     wins = 0
