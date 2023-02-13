@@ -44,7 +44,7 @@ I also tested a version with lower level of depth and implemented alpha beta pru
 
 This agent proved quite tricky to setup, and I went through quite a lot of troubleshooting. I found some suggestions in the repo in [this article](https://towardsdatascience.com/practical-reinforcement-learning-02-getting-started-with-q-learning-582f63e4acd9), but unfortunately is not available anymore. I changed it a lot and performed some parameter tuning.
 The parameters in this method where 3: alpha as the learning rate, or a general multiplier for the rewards; gamma, which is the multiplier of the maximum future q values among possible moves; and epsilon, which is an "exploitation vs. exploration" factor.
-The model is only able to play with nim size=5 and as a starting player. 
+The model is only able to play with nim size=5 and as a starting player.
 The learning procedure works as follows: from the first third of the training the opponent is the pure random strategy, then the opponent becomes the much more fearsom hard coded strategy.
 The idea is to try and challenge the strategy more and more.
 
